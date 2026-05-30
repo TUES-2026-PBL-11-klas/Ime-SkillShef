@@ -1,15 +1,16 @@
 package com.skillchef.server.auth;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /** Maps auth domain and validation errors to clean JSON responses. */
 @RestControllerAdvice(assignableTypes = AuthController.class)
@@ -17,7 +18,9 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<Map<String, Object>> handleAuth(AuthException ex) {
-        return ResponseEntity.status(ex.getStatus()).body(body(ex.getStatus(), ex.getMessage()));
+        HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        return ResponseEntity.status(HttpStatusCode.valueOf(status.value()))
+            .body(body(status, ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
