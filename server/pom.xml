@@ -84,6 +84,26 @@
             <version>4.0.0</version>
         </dependency>
 
+        <!-- Health-check endpoint for Render (/actuator/health) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Sentry error tracking (Spring Boot 3 / Jakarta EE) -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>8.13.2</version>
+        </dependency>
+
+        <!-- Structured JSON logging (emitted to stdout; forwarded to Logtail via Render Log Drain) -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
