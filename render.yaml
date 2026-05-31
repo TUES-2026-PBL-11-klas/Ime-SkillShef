@@ -43,6 +43,21 @@ services:
       # Set to the frontend URL, e.g. https://skillchef-client.onrender.com
       - key: APP_BASE_URL
         sync: false
+      # Storage (Cloudflare R2 / AWS S3)
+      - key: STORAGE_ENDPOINT
+        sync: false  # e.g. https://<account-id>.r2.cloudflarestorage.com
+      - key: STORAGE_REGION
+        value: auto
+      - key: STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: STORAGE_BUCKET
+        value: skillchef-media
+      - key: STORAGE_CDN_BASE_URL
+        sync: false  # e.g. https://media.skillchef.com
+      - key: STORAGE_MAX_FILE_SIZE_MB
+        value: "20"
       # Sentry — obtain DSN from https://sentry.io → Project Settings → Client Keys
       - key: SENTRY_DSN
         sync: false
