@@ -1,5 +1,15 @@
 # CLAUDE.md
 
+## Project Overview
+
+**SkillChef** is a culinary learning platform (MVP, 5-week timeline) with a skill tree, gamification (XP/levels), AI chef assistant, video lessons, challenges, and a social community feed.
+
+- **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind — `client/`
+- **Backend:** Java 21, Spring Boot 3.4.2, Flyway, JWT — `server/`
+- **Database:** PostgreSQL on Render, Redis for caching/queues
+- **Hosting:** Render (web + worker services), auto-deploy from `main`
+- **Monitoring:** Sentry (errors), Logtail/Better Stack (logs), PostHog (analytics)
+
 ## Documentation Requirement
 
 Before making any code changes, you MUST read the `/Documentation` folder and all of its contents in full. All code changes must be accurate to and consistent with the specifications, requirements, and designs described in the `/Documentation` folder.
