@@ -77,6 +77,12 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
+        <!-- Redis cache for skill tree responses -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <!-- Loads variables from a local .env file into the Spring Environment -->
         <dependency>
             <groupId>me.paulschwarz</groupId>

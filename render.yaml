@@ -53,6 +53,11 @@ services:
       # to ship container stdout automatically without embedding the token in the app.
       - key: LOGTAIL_SOURCE_TOKEN
         sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: skillchef-redis
+          property: connectionString
 
   # ---------------------------------------------------------------------------
   # Next.js Frontend
