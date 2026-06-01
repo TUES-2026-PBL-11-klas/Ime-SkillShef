@@ -23,8 +23,7 @@ public class CacheConfig {
                                           ObjectMapper objectMapper) {
         ObjectMapper mapper = Objects.requireNonNull(objectMapper, "objectMapper");
         RedisConnectionFactory factory = Objects.requireNonNull(connectionFactory, "connectionFactory");
-        Duration ttl = Objects.requireNonNull(Duration.ofMinutes(10), "cacheTtl");
-
+        Duration ttl = Duration.ofMinutes(10);
         RedisSerializationContext.SerializationPair<Object> serializer =
                 RedisSerializationContext.SerializationPair.fromSerializer(
                         new GenericJackson2JsonRedisSerializer(mapper));
