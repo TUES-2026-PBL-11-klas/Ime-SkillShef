@@ -1,5 +1,6 @@
 package com.skillchef.server.skilltree;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -9,10 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- * Learning content attached to a {@link SkillNode}. A lesson typically points
- * to a video and carries a duration used for progress estimation.
- */
 @Entity
 @Table(name = "lessons")
 public class Lesson {
@@ -28,14 +25,17 @@ public class Lesson {
     @Column(nullable = false)
     private String title;
 
-    @Column
+    @Column(columnDefinition = "text")
     private String description;
 
-    @Column(name = "video_url")
+    @Column(name = "video_url", nullable = false)
     private String videoUrl;
 
     @Column(name = "duration_seconds", nullable = false)
     private int durationSeconds = 0;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    private OffsetDateTime createdAt;
 
     public UUID getId() {
         return id;
@@ -83,5 +83,9 @@ public class Lesson {
 
     public void setDurationSeconds(int durationSeconds) {
         this.durationSeconds = durationSeconds;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 }

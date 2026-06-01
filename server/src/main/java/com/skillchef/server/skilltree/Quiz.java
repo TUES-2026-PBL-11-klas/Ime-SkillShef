@@ -1,6 +1,10 @@
 package com.skillchef.server.skilltree;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,10 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- * A knowledge-check question attached to a {@link SkillNode}. {@code options}
- * is stored as a JSON-encoded array of strings and parsed by the service layer.
- */
 @Entity
 @Table(name = "quizzes")
 public class Quiz {
@@ -25,11 +25,18 @@ public class Quiz {
     @Column(name = "node_id", nullable = false)
     private UUID nodeId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String question;
 
-    @Column(columnDefinition = "text")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", nullable = false)
     private String options;
+
+    @Column(name = "correct_answer", nullable = false)
+    private String correctAnswer;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    private OffsetDateTime createdAt;
 
     public UUID getId() {
         return id;
@@ -61,5 +68,17 @@ public class Quiz {
 
     public void setOptions(String options) {
         this.options = options;
+    }
+
+    public String getCorrectAnswer() {
+        return correctAnswer;
+    }
+
+    public void setCorrectAnswer(String correctAnswer) {
+        this.correctAnswer = correctAnswer;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 }

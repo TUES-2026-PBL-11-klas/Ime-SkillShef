@@ -7,14 +7,8 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-/**
- * Composite primary key for {@link SkillProgress}, identifying a single
- * (user, skill node) pair.
- */
 @Embeddable
 public class SkillProgressId implements Serializable {
-
-    private static final long serialVersionUID = 1L;
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
@@ -54,7 +48,8 @@ public class SkillProgressId implements Serializable {
         if (!(o instanceof SkillProgressId that)) {
             return false;
         }
-        return Objects.equals(userId, that.userId) && Objects.equals(nodeId, that.nodeId);
+        return Objects.equals(userId, that.userId)
+                && Objects.equals(nodeId, that.nodeId);
     }
 
     @Override

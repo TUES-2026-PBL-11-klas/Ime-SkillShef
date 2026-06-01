@@ -7,11 +7,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-/**
- * Per-user progress on a single {@link SkillNode}. A row is created when a node
- * is unlocked and updated as the user advances; {@code completedAt} marks the
- * node as finished for the purpose of unlocking higher tiers.
- */
 @Entity
 @Table(name = "skill_progress")
 public class SkillProgress {
@@ -27,6 +22,9 @@ public class SkillProgress {
 
     @Column(name = "completed_at")
     private OffsetDateTime completedAt;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    private OffsetDateTime createdAt;
 
     public SkillProgressId getId() {
         return id;
@@ -58,5 +56,9 @@ public class SkillProgress {
 
     public void setCompletedAt(OffsetDateTime completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 }

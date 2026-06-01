@@ -1,5 +1,6 @@
 package com.skillchef.server.skilltree;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -9,10 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- * A top-level skill category (e.g. "Knife Skills", "Baking") that groups
- * {@link SkillNode}s into a tree the user can progress through.
- */
 @Entity
 @Table(name = "skill_domains")
 public class SkillDomain {
@@ -22,11 +19,14 @@ public class SkillDomain {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column
+    @Column(columnDefinition = "text")
     private String description;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    private OffsetDateTime createdAt;
 
     public UUID getId() {
         return id;
@@ -50,5 +50,9 @@ public class SkillDomain {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 }
