@@ -10,6 +10,8 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class SkillProgressId implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
