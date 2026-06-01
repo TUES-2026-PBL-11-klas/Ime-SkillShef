@@ -32,7 +32,7 @@ public class SkillNode {
     private String description;
 
     @Column(nullable = false)
-    private int tier = 1;
+    private int tier;
 
     @Column(name = "xp_reward", nullable = false)
     private int xpReward = 0;
