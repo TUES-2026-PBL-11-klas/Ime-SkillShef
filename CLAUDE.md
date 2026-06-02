@@ -18,6 +18,12 @@ This applies to every task, no exceptions — even small edits must be checked a
 
 ---
 
+## Environment Variables
+
+Whenever you add a new environment variable in the backend (`server/`), you MUST always document it in [server/.env.example](server/.env.example) with a sensible default and a short comment describing its purpose. The `.env.example` file is the single source of truth for the backend's environment configuration — no backend env variable may be referenced in code or `application*.properties` without a corresponding entry there.
+
+---
+
 ## Client App: Layered Clean Architecture
 
 When working in the `client/` app, you MUST strictly follow the existing layered clean architecture. Before making any changes, read the README file in the relevant layer's directory — it is the authoritative description of that layer's purpose, responsibilities, and rules.
