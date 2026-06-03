@@ -2,11 +2,14 @@ package com.skillchef.server.skilltree;
 
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.skillchef.server.progression.LevelCurve;
+import com.skillchef.server.progression.LevelUpEvent;
 import com.skillchef.server.user.User;
 import com.skillchef.server.user.UserRepository;
 
@@ -20,11 +23,14 @@ public class XpAwardService {
 
     private final XpTransactionRepository xpTransactionRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public XpAwardService(XpTransactionRepository xpTransactionRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          ApplicationEventPublisher eventPublisher) {
         this.xpTransactionRepository = xpTransactionRepository;
         this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -54,12 +60,18 @@ public class XpAwardService {
         tx.setSourceId(sourceId);
         xpTransactionRepository.save(tx);
 
+        int oldLevel = user.getLevel();
         int newXp = user.getGlobalXp() + amount;
+        int newLevel = LevelCurve.levelForXp(newXp);
         user.setGlobalXp(newXp);
-        user.setLevel(LevelFormula.levelForXp(newXp));
+        user.setLevel(newLevel);
         userRepository.save(user);
 
-        return new Result(amount, newXp, user.getLevel());
+        if (newLevel > oldLevel) {
+            eventPublisher.publishEvent(new LevelUpEvent(userId, oldLevel, newLevel, newXp));
+        }
+
+        return new Result(amount, newXp, newLevel);
     }
 
     /** Snapshot of the effect of an XP award. */

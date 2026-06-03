@@ -1,17 +1,16 @@
 package com.skillchef.server.skilltree;
 
-/**
- * Simple, deterministic XP &rarr; level mapping shared by the learning-content
- * features. Each level costs a flat {@link #XP_PER_LEVEL} amount of XP.
- *
- * <p>The richer progression rules (leaderboards, curved formulas, etc.) live in
- * the dedicated Progression Service (issue #19); this helper only provides the
- * minimal mapping needed when XP is awarded for passing a quiz.
- */
-public final class LevelFormula {
+import com.skillchef.server.progression.LevelCurve;
 
-    /** XP required to advance one level. */
-    public static final int XP_PER_LEVEL = 100;
+/**
+ * Thin compatibility shim that delegates to the canonical
+ * {@link LevelCurve} (issue #19). Retained so existing call sites keep working;
+ * prefer using {@link LevelCurve} directly in new code.
+ *
+ * @deprecated use {@link LevelCurve} instead.
+ */
+@Deprecated
+public final class LevelFormula {
 
     private LevelFormula() {
     }
@@ -23,7 +22,6 @@ public final class LevelFormula {
      * @return the resulting level ({@code >= 1})
      */
     public static int levelForXp(int totalXp) {
-        int safeXp = Math.max(0, totalXp);
-        return 1 + (safeXp / XP_PER_LEVEL);
+        return LevelCurve.levelForXp(totalXp);
     }
 }
