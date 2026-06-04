@@ -1,5 +1,12 @@
 package com.skillchef.server.auth;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.skillchef.server.auth.config.AuthProperties;
 import com.skillchef.server.auth.dto.AuthDtos.AuthResponse;
 import com.skillchef.server.auth.dto.AuthDtos.LoginRequest;
@@ -13,12 +20,6 @@ import com.skillchef.server.auth.token.RefreshTokenRepository;
 import com.skillchef.server.auth.token.TokenGenerator;
 import com.skillchef.server.user.User;
 import com.skillchef.server.user.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 /**
  * Application logic for the auth use-cases: signup, login, logout, and token
@@ -89,7 +90,11 @@ public class AuthService {
         if (!stored.isActive()) {
             throw AuthException.unauthorized("Refresh token is expired or revoked");
         }
-        User user = userRepository.findById(stored.getUserId())
+        UUID userId = stored.getUserId();
+        if (userId == null) {
+            throw AuthException.unauthorized("Account no longer exists");
+        }
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> AuthException.unauthorized("Account no longer exists"));
 
         // Rotate: revoke the presented token and issue a fresh pair.
@@ -123,6 +128,9 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public UserSummary currentUser(UUID userId) {
+        if (userId == null) {
+            throw AuthException.unauthorized("Account no longer exists");
+        }
         return userRepository.findById(userId)
                 .map(AuthService::toSummary)
                 .orElseThrow(() -> AuthException.unauthorized("Account no longer exists"));
