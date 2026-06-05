@@ -1,5 +1,8 @@
 package com.skillchef.server.community;
 
+import com.skillchef.server.notification.NotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,16 +16,21 @@ import static com.skillchef.server.community.RecipeDtos.*;
 @Service
 public class EngagementService {
 
+    private static final Logger log = LoggerFactory.getLogger(EngagementService.class);
+
     private final RecipePostRepository postRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
     public EngagementService(RecipePostRepository postRepository,
                               LikeRepository likeRepository,
-                              CommentRepository commentRepository) {
+                              CommentRepository commentRepository,
+                              NotificationService notificationService) {
         this.postRepository = postRepository;
         this.likeRepository = likeRepository;
         this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
     }
 
     // --- likes ---
@@ -37,6 +45,9 @@ public class EngagementService {
         like.setUserId(userId);
         like.setRecipePostId(postId);
         likeRepository.save(like);
+        // best-effort: notification failure must not roll back the like
+        try { notificationService.onPostLiked(userId, postId); }
+        catch (Exception e) { log.warn("Like notification failed for post {}: {}", postId, e.getMessage()); }
     }
 
     @Transactional
@@ -56,6 +67,9 @@ public class EngagementService {
         comment.setRecipePostId(postId);
         comment.setContent(req.content());
         comment = commentRepository.save(comment);
+        // best-effort: notification failure must not roll back the comment
+        try { notificationService.onPostCommented(userId, postId); }
+        catch (Exception e) { log.warn("Comment notification failed for post {}: {}", postId, e.getMessage()); }
         return toCommentResponse(comment);
     }
 

@@ -90,6 +90,13 @@
             <version>4.0.0</version>
         </dependency>
 
+        <!-- SendGrid transactional email -->
+        <dependency>
+            <groupId>com.sendgrid</groupId>
+            <artifactId>sendgrid-java</artifactId>
+            <version>4.10.2</version>
+        </dependency>
+
         <!-- Health-check endpoint for Render (/actuator/health) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
