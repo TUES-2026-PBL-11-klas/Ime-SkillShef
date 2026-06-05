@@ -16,7 +16,7 @@ export async function getUserPostsAction(userId: string, page = 0, size = 20): P
 export async function createPostAction(input: unknown): Promise<ApiResponse<Post>> {
   const parsed = CreatePostSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input' };
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' };
   }
   return postService.createPost(parsed.data);
 }
