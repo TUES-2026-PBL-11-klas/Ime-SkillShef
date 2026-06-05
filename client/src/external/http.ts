@@ -1,7 +1,8 @@
 import { ErrorResponseSchema, type ApiResponse } from '@/schemas/api';
+import { cookies } from 'next/headers';
 import z from 'zod';
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 type HttpOptions = {
   body?: unknown;
@@ -16,8 +17,9 @@ type HttpFunctionConfig<T> = {
 }
 
 /**
- * HTTP abstraction for API calls
- * Handles authentication, error parsing, and consistent response shape
+ * HTTP abstraction for API calls.
+ * Handles authentication, error parsing, and consistent response shape.
+ * Must only be called server-side (Server Components / Server Actions).
  */
 export async function http<T>({
   method,
@@ -25,7 +27,7 @@ export async function http<T>({
   options,
   schema
 }: HttpFunctionConfig<T>): Promise<ApiResponse<T>> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
   const url = `${baseUrl}${path}`;
 
   const headers: Record<string, string> = {
@@ -33,19 +35,16 @@ export async function http<T>({
     ...options?.headers,
   };
 
-  // Add auth token if available (from localStorage or cookie)
-  if (typeof window !== 'undefined') {
-    console.log("Only make backend API calls server side.")
-    return {
-        success: false,
-        error: "Only make backend API calls server side."
-    }
+  // Automatically attach the JWT access token from cookies when present.
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('accessToken')?.value;
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+  } catch {
+    // cookies() throws outside a request context — safe to ignore.
   }
 
-  const config: RequestInit = {
-    method,
-    headers,
-  };
+  const config: RequestInit = { method, headers };
 
   if (options?.body && method !== 'GET') {
     config.body = JSON.stringify(options.body);
@@ -55,55 +54,25 @@ export async function http<T>({
     const response = await fetch(url, config);
     const status = response.status;
 
-    // Parse JSON response
     let json: unknown;
     try {
       json = await response.json();
     } catch {
-      // If response is not JSON, treat as error
-      return {
-        success: false,
-        error: 'Invalid response format',
-      };
+      return { success: false, error: 'Invalid response format' };
     }
 
-    // Check if response is successful (2xx)
     if (status >= 200 && status < 300) {
-        if(schema) {
-            const parsedData = schema.safeParse(json)
-            if(!parsedData.success) {
-                return {
-                    success: false,
-                    error: "Invalid response format"
-                }
-            }
-        }
-
-        return {
-            success: true,
-            data: json as T,
-        };
+      if (schema) {
+        const parsed = schema.safeParse(json);
+        if (!parsed.success) return { success: false, error: 'Invalid response format' };
+      }
+      return { success: true, data: json as T };
     }
 
-    // Handle error response
-    const parsedError = ErrorResponseSchema.safeParse(json)
-    if(parsedError.success) {
-        return {
-            success: false,
-            error: parsedError.data.error
-        }
-    }
-
-    // Fallback for unexpected error format
-    return {
-      success: false,
-      error: 'An unexpected error occurred',
-    };
+    const parsedError = ErrorResponseSchema.safeParse(json);
+    if (parsedError.success) return { success: false, error: parsedError.data.error };
+    return { success: false, error: 'An unexpected error occurred' };
   } catch (error) {
-    // Network errors or fetch failures
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Network error',
-    };
+    return { success: false, error: error instanceof Error ? error.message : 'Network error' };
   }
 }
