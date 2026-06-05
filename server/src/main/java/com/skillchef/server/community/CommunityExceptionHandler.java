@@ -12,13 +12,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice(assignableTypes = {RecipePostController.class, EngagementController.class})
+@RestControllerAdvice(assignableTypes = {RecipePostController.class, EngagementController.class, FeedController.class})
 public class CommunityExceptionHandler {
 
     @ExceptionHandler(CommunityException.class)
     public ResponseEntity<Map<String, Object>> handleCommunity(CommunityException ex) {
         HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(HttpStatusCode.valueOf(status.value())).body(body(status, ex.getMessage()));
+    }
+
+    @ExceptionHandler(FeedController.FeedAuthException.class)
+    public ResponseEntity<Map<String, Object>> handleFeedAuth(FeedController.FeedAuthException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body(HttpStatus.UNAUTHORIZED, ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
