@@ -9,11 +9,11 @@
 # Environment management:
 #   dev     → run locally with .env files (see server/.env.example, client/.env.example)
 #   staging → duplicate these services with name suffix "-staging" in a separate Render project
-#   prod    → this file (SPRING_PROFILES_ACTIVE / NODE_ENV controls behavior)
+#   prod    → this file (SPRING_PROFILES_ACTIVE / NODE_ENV controls behaviour)
 
 services:
   # ---------------------------------------------------------------------------
-  # Spring Boot API
+  # Spring Boot API (Docker runtime — Java is not natively supported on Render)
   # ---------------------------------------------------------------------------
   - type: web
     name: skillchef-api
@@ -24,79 +24,137 @@ services:
     autoDeploy: true
     dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
+
     envVars:
-      # Database — set to: jdbc:postgresql://<host>:<port>/<db>
+      # ── Database ────────────────────────────────────────────────────────────
+      # Format: jdbc:postgresql://<host>:<port>/<db>
+      # Get from: Render dashboard → skillchef-db → Connect → Internal URL
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USERNAME
         sync: false
       - key: DATABASE_PASSWORD
         sync: false
-      # Runtime profile
+
+      # ── Runtime ─────────────────────────────────────────────────────────────
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      # JWT — generateValue creates a strong random secret on first deploy
+
+      # ── Auth / JWT ──────────────────────────────────────────────────────────
+      # generateValue: Render creates a cryptographically strong secret automatically.
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_ISSUER
         value: skillchef
-      # Set to the frontend URL, e.g. https://skillchef-client.onrender.com
+      - key: JWT_ACCESS_TTL
+        value: PT15M
+      - key: REFRESH_TTL
+        value: P30D
+
+      # ── CORS ────────────────────────────────────────────────────────────────
+      # Set to the deployed frontend URL, e.g. https://skillchef-client.onrender.com
       - key: APP_BASE_URL
         sync: false
-      # Sentry — obtain DSN from https://sentry.io → Project Settings → Client Keys
+
+      # ── Storage (Cloudflare R2 recommended; also compatible with AWS S3) ────
+      # R2 endpoint:  https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+      # S3 endpoint:  leave blank
+      - key: STORAGE_ENDPOINT
+        sync: false
+      # R2 region: "auto"  |  S3 region: e.g. "us-east-1"
+      - key: STORAGE_REGION
+        value: auto
+      - key: STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: STORAGE_BUCKET
+        value: skillchef-media
+      # Public CDN base URL for uploaded files, e.g. https://pub-xxx.r2.dev
+      - key: STORAGE_CDN_BASE_URL
+        sync: false
+      - key: STORAGE_MAX_FILE_SIZE_MB
+        value: "20"
+
+      # ── Sentry error tracking ────────────────────────────────────────────────
+      # Get DSN: sentry.io → Project Settings → Client Keys
       - key: SENTRY_DSN
         sync: false
       - key: SENTRY_ENVIRONMENT
         value: production
-      # Logtail — obtain token from https://betterstack.com → Sources → your source
-      # Note: on Render, you can also configure a Log Drain (Dashboard → Logs → Drain)
-      # to ship container stdout automatically without embedding the token in the app.
+
+      # ── Notifications / SendGrid ─────────────────────────────────────────────
+      # Leave blank to disable email notifications.
+      # Get key: app.sendgrid.com → Settings → API Keys
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM_EMAIL
+        sync: false
+      - key: SENDGRID_FROM_NAME
+        value: SkillChef
+
+      # ── Logtail / Better Stack ───────────────────────────────────────────────
+      # Preferred alternative: configure a Log Drain in the Render dashboard
+      # (Dashboard → your service → Logs → Add Drain) — no token needed in the app.
       - key: LOGTAIL_SOURCE_TOKEN
         sync: false
 
   # ---------------------------------------------------------------------------
-  # Next.js Frontend
+  # Next.js Frontend (Node.js runtime)
   # ---------------------------------------------------------------------------
   - type: web
     name: skillchef-client
     runtime: node
+    nodeVersion: "20"
     plan: free
     rootDir: client
     branch: main
     autoDeploy: true
     buildCommand: pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start
+    healthCheckPath: /
+
     envVars:
-      # API base URL — set to: https://skillchef-api.onrender.com
+      # ── Backend API ──────────────────────────────────────────────────────────
+      # Set to: https://skillchef-api.onrender.com
       - key: NEXT_PUBLIC_API_URL
         sync: false
-      # Sentry (frontend)
+
+      # ── Sentry (frontend) ────────────────────────────────────────────────────
       - key: NEXT_PUBLIC_SENTRY_DSN
         sync: false
+      # Auth token is used only at build time to upload source maps.
+      # Get: sentry.io → Org Settings → Auth Tokens
       - key: SENTRY_AUTH_TOKEN
         sync: false
       - key: SENTRY_ENVIRONMENT
         value: production
-      # PostHog — obtain key from https://app.posthog.com → Project Settings → API keys
-      - key: NEXT_PUBLIC_POSTHOG_KEY
-        sync: false
-      - key: NEXT_PUBLIC_POSTHOG_HOST
-        value: https://us.posthog.com
-      # Sentry org/project for source map uploads (not secrets, but project-specific)
+      # Sentry org slug and project name visible in your sentry.io project URL.
       - key: SENTRY_ORG
         sync: false
       - key: SENTRY_PROJECT
         sync: false
-      # Logtail — Next.js server-side log shipping
+
+      # ── PostHog analytics ────────────────────────────────────────────────────
+      # Get key: app.posthog.com → Project Settings → API Keys
+      - key: NEXT_PUBLIC_POSTHOG_KEY
+        sync: false
+      # US cloud: https://us.posthog.com  |  EU cloud: https://eu.posthog.com
+      - key: NEXT_PUBLIC_POSTHOG_HOST
+        value: https://us.posthog.com
+
+      # ── Logtail / Better Stack (server-side Next.js logs) ────────────────────
       - key: LOGTAIL_SOURCE_TOKEN
         sync: false
 
   # ---------------------------------------------------------------------------
-  # Background Worker  (uncomment when worker/ directory is scaffolded — Issue #3 / Person 3)
+  # Background Worker
+  # Uncomment when the worker/ directory is scaffolded (Person 3 — BullMQ jobs).
   # ---------------------------------------------------------------------------
   # - type: worker
   #   name: skillchef-worker
   #   runtime: node
+  #   nodeVersion: "20"
   #   plan: free
   #   rootDir: worker
   #   branch: main
@@ -117,16 +175,16 @@ services:
   #       sync: false
 
   # ---------------------------------------------------------------------------
-  # Redis — shared by API (session cache) and Worker (BullMQ queues)
+  # Redis — session cache (API) and job queue (Worker)
   # ---------------------------------------------------------------------------
   - type: redis
     name: skillchef-redis
     plan: free
-    ipAllowList: []
+    ipAllowList: []     # empty = only internal Render services can connect
 
 databases:
   # ---------------------------------------------------------------------------
-  # PostgreSQL
+  # PostgreSQL — primary data store
   # ---------------------------------------------------------------------------
   - name: skillchef-db
     plan: free
