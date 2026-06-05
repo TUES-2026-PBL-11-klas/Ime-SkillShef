@@ -24,7 +24,7 @@ export async function getCommentsAction(postId: string, page = 0, size = 20): Pr
 export async function addCommentAction(postId: string, input: unknown): Promise<ApiResponse<Comment>> {
   const parsed = AddCommentSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input' };
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' };
   }
   return engagementService.addComment(postId, parsed.data.content);
 }
