@@ -38,8 +38,10 @@ public class AiClientConfig {
         String provider = props.getProvider() == null ? "" : props.getProvider().toLowerCase();
         return switch (provider) {
             case "gemini" -> new GeminiChatClient(props, restClient);
+            case "groq" -> new GroqChatClient(props, restClient);
+            case "anthropic" -> new AnthropicChatClient(props, restClient);
             default -> throw new IllegalStateException(
-                    "Unsupported skillchef.ai.provider '" + props.getProvider() + "' (supported: gemini)");
+                    "Unsupported skillchef.ai.provider '" + props.getProvider() + "' (supported: gemini, groq, anthropic)");
         };
     }
 }
