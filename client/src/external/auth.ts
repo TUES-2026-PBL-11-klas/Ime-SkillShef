@@ -20,7 +20,7 @@ import type {
 export async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const store = await cookies();
-    const token = store.get("access_token")?.value;
+    const token = store.get("accessToken")?.value;
     return token ? { Authorization: `Bearer ${token}` } : {};
   } catch {
     // cookies() throws outside a request scope; treat as unauthenticated.
