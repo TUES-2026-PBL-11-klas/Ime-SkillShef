@@ -65,12 +65,14 @@ services:
   - type: web
     name: skillchef-client
     runtime: node
+    nodeVersion: "20"
     plan: free
     rootDir: client
     branch: main
     autoDeploy: true
     buildCommand: pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start
+    healthCheckPath: /
     envVars:
       # API base URL — set to: https://skillchef-api.onrender.com
       - key: NEXT_PUBLIC_API_URL

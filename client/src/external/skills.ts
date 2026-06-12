@@ -15,7 +15,7 @@ import {
 export async function fetchSkillTree() {
   return http<SkillTreeResponse>({
     method: "GET",
-    path: "/skills/tree",
+    path: "/api/skills/tree",
     options: { headers: await getAuthHeaders() },
     schema: SkillTreeResponseSchema,
   });
@@ -24,7 +24,7 @@ export async function fetchSkillTree() {
 export async function unlockNode(nodeId: string) {
   return http<Progress>({
     method: "POST",
-    path: `/skills/nodes/${nodeId}/unlock`,
+    path: `/api/skills/nodes/${nodeId}/unlock`,
     options: { headers: await getAuthHeaders() },
     schema: ProgressSchema,
   });
@@ -33,7 +33,7 @@ export async function unlockNode(nodeId: string) {
 export async function completeNode(nodeId: string) {
   return http<Progress>({
     method: "POST",
-    path: `/skills/nodes/${nodeId}/complete`,
+    path: `/api/skills/nodes/${nodeId}/complete`,
     options: { headers: await getAuthHeaders() },
     schema: ProgressSchema,
   });

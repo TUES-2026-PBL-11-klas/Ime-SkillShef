@@ -1,0 +1,40 @@
+# ── Build artefacts ────────────────────────────────────────────────────────────
+# Regenerated during the Docker build — including them adds hundreds of MB
+# to the build context and slows every deploy.
+target/
+
+# ── Version control ─────────────────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── Documentation & local-only files ───────────────────────────────────────────
+*.md
+Documentation/
+
+# ── Secret / local environment files ───────────────────────────────────────────
+# Never ship .env files into the Docker image.
+.env
+.env.local
+.env.*.local
+
+# ── IDE & editor configuration ──────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.springBeans
+.factorypath
+.apt_generated
+
+# ── OS artefacts ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Test reports & coverage ──────────────────────────────────────────────────────
+surefire-reports/
+jacoco.exec

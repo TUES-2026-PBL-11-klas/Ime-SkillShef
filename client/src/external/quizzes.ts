@@ -17,7 +17,7 @@ import z from "zod";
 export async function fetchQuizzesByNode(nodeId: string) {
   return http<QuizPublic[]>({
     method: "GET",
-    path: `/quizzes/node/${nodeId}`,
+    path: `/api/quizzes/node/${nodeId}`,
     options: { headers: await getAuthHeaders() },
     schema: z.array(QuizPublicSchema),
   });
@@ -26,7 +26,7 @@ export async function fetchQuizzesByNode(nodeId: string) {
 export async function fetchQuiz(quizId: string) {
   return http<QuizPublic>({
     method: "GET",
-    path: `/quizzes/${quizId}`,
+    path: `/api/quizzes/${quizId}`,
     options: { headers: await getAuthHeaders() },
     schema: QuizPublicSchema,
   });
@@ -35,7 +35,7 @@ export async function fetchQuiz(quizId: string) {
 export async function submitQuiz(quizId: string, selectedAnswer: string) {
   return http<QuizResult>({
     method: "POST",
-    path: `/quizzes/${quizId}/submit`,
+    path: `/api/quizzes/${quizId}/submit`,
     options: { headers: await getAuthHeaders(), body: { selectedAnswer } },
     schema: QuizResultSchema,
   });
